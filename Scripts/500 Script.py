@@ -6,14 +6,12 @@ import itertools
 #Output directory
 out_dir = "MLpics/"
 
-#list of folders 
+#list of folders
 feature_list = ["Eyeglasses", "Wearing_Hat", "Wearing_Lipstick", "No_Beard"]
 
 os.makedirs(out_dir)
 
 for folder in feature_list:
     os.makedirs(out_dir + folder)
-    src_dir = folder + "/"
     for i in range(500):
-        shutil.copy(src_dir, out_dir + folder)
-        
+        shutil.copy(folder, out_dir + folder)
