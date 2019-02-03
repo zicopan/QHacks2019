@@ -14,7 +14,8 @@ feature_dict = {
     "Eyeglasses": None,
     "Wearing_Hat": None,
     "Wearing_Lipstick": None,
-    "No_Beard": None
+    "No_Beard": None,
+    "Bald":None
 }
 
 os.makedirs(out_dir)

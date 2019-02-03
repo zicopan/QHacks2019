@@ -7,7 +7,7 @@ import itertools
 out_dir = "MLpics/"
 
 #list of folders 
-feature_list = ["Eyeglasses", "Wearing_Hat", "Wearing_Lipstick", "No_Beard"]
+feature_list = ["Eyeglasses", "Wearing_Hat", "Wearing_Lipstick", "No_Beard", "Bald"]
 
 os.makedirs(out_dir)
 
