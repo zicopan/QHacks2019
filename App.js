@@ -12,7 +12,7 @@ import {
 
 import OpenScreen from './screens/OpenScreen.js'
 import HomeScreen from './screens/HomeScreen.js'
-import Adpage from './screens/Adpage.js'
+import Adpage from './screens/AdPage.js'
 
 
 export default class App extends React.Component {
