@@ -1,6 +1,6 @@
 // CarMan 
 /*
-Nico, Maanav, Kshitij
+Nico, Matt, Aidan, Andrew
 */
 
 import React from 'react';
@@ -12,6 +12,8 @@ import {
 
 import OpenScreen from './screens/OpenScreen.js'
 import HomeScreen from './screens/HomeScreen.js'
+import Adpage from './screens/Adpage.js'
+
 
 export default class App extends React.Component {
   render() {
@@ -23,7 +25,8 @@ export default class App extends React.Component {
 
 const Navi = createStackNavigator({
   Open: OpenScreen,
-  Home: HomeScreen
+  Home: HomeScreen,
+  Ad: Adpage,
 },
 {
   headerMode: 'none',
