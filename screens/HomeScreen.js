@@ -9,12 +9,16 @@ import {
 } from "react-native";
 import { Camera, Permissions } from "expo";
 
-import vision from "react-cloud-vision-api";
-import { Icon, Button } from "native-base";
-import { stringify } from "qs";
+
+// if just using cloud vision, use the below module to make api requests
+// import vision from "react-cloud-vision-api";
+
+// import { Icon, Button } from "native-base";
+// import { stringify } from "qs";
 
 'use strict'
 
+// put VISION API key here (not for AutoML)
 //vision.init({ auth: 'AIzaSyDvZlteL62QW6wmc2OWbMqv4LSg-0nH-GM' })
 
 class HomeScreen extends React.Component {
@@ -27,7 +31,8 @@ class HomeScreen extends React.Component {
         photoHolder: "",
         url: "",
         text: "Testing ideaTesting ideaTesting ideaTesting ideaTesting ideaTesting",
-        jsonText: ""
+        jsonText: "",
+        picPath: ""
     };
 
     async componentWillMount() {
@@ -139,26 +144,23 @@ class HomeScreen extends React.Component {
 
     }
 
-    //requestFromGoogle() (not used anymore)
-    /*
-    this data is sent through the Google Vision API, but due to lack of development, 
-    it only returns the labels associated with a picture. thus, to be more specific,
-    we implement a new strategy (takeAndUploadPhotoAsync()) which connects to a 
-    back-end sql server
-    */
+
+
+    showAdvertisement() {
+        <Image styles={styles.Image}
+            source={require('../ads/Eyeglasses1.jpg')}
+        />
+    }
+
+    // request from AutoML Vision database
     uploadToCloud = async () => {
         if (this.state.imageuri == "") {
             Alert.alert("You have nothing to upload")
         }
         else {
-            //const gcpToken = "ya29.GlukBgEl6jOzdL-Wu4OD2aFaLzGsuxe0ysBBiNhUwnoFBYYD2PmuESR2ztP93F0B7X2CyOWx0oK4QDsHA1LZKNU8VmjHQFs47sj-XYx3cVH1tnvLIpKtbhy6Xz4G";
-            //const gcpToken = "ya29.GlukBp-XQDONksWiyiDsbUUdVsHOXYd3SK4ooEd7ZS3x9iX4ckA4Em1xmN6mnD7uU13bgnr79psz_glwCLNIFoeKOd_xFFbmCG7NL54kjI3Dmzj6wNFUIF4jWPT-";
-            //const gcpToken = "ya29.c.El-kBvn1x5ZMyBel0JHlGaeLXpfmaChVPvrL-VDHlLaLcqhYsMOWTmjNaGh2Rz2bTw7euZ6uYKA1TRgoHst2S0NhGPx8WUZS2aNQtQLS6DmKf9bFU30euJL9lsjLZASgBA";
-            
-            
             // gcloud auth print-access-token --> get new tokens
-
-            const gcpToken = "ya29.c.El-kBnfuha_33R6tJ7G2716Hmm34xo9DQIJdlj8_lsoVOgg60QKs6-ktGQqEa1cXY8MhnZD6h4riG0qCLFa9P4VJF2bp7X2usJ-Q6C5QjCDMWbfEE-VXKzrq-jgW2GZu1g";
+            // these tokens expire after one hour
+            const gcpToken = "ya29.c.El-lBn4vTF5ecmC_njg9Cm9a1Ob_Fl5yi8dqIrJ08TWwc3iZ2_c_7msibJRWbMNIgJKnNONJqZN4vjlJ8Jn1siOdEovI3R4akeXa45-hgqCcxQgE_LxMzfseEipzPmfE5w";
 
 
             const data = {
@@ -166,21 +168,15 @@ class HomeScreen extends React.Component {
                     image: {
                         imageBytes: this.state.imageuri
                     }
-                    // features: [
-                    //     {type: CUSTOM_LABEL_DETECTION, maxResults: 10}
-                    //     //{type: jackets, maxResults: 10},
-                    // ]
-                    // customLabelDetectionModels:
-                    // 'projects/qhacks-230509/locations/us-central1/models/ICN2324832152449587797:predict'
                 },
                 params: {
-                    score_threshold: '0.1'
+                    score_threshold: '0.0'
                 }
             }
-            // dont chang this
 
             // console.log(JSON.stringify(this.state.imageuri));
-            fetch('https://automl.googleapis.com/v1beta1/projects/qhacks-230509/locations/us-central1/models/ICN2324832152449587797:predict',
+            // make a post request --> post something to api and await its result
+            fetch('https://automl.googleapis.com/v1beta1/projects/qhacks-230509/locations/us-central1/models/ICN1146187338761166163:predict',
                 {
                     method: 'POST',
                     mode: "cors",
@@ -188,19 +184,17 @@ class HomeScreen extends React.Component {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${gcpToken}`
                     },
-                    //body: JSON.stringify(data)
                     body: JSON.stringify(data)
-
-
-                    //body: this.state.imageuri
                 })
+                
 
+                // parse the JSON file to get desired results
                 .then((response) => {
                     // console.log(this.state.imageuri)
                     console.log("------------------");
 
                     //let temp = response['P'];
-                    
+
                     //console.log(response)
                     console.log("\n")
 
@@ -208,24 +202,68 @@ class HomeScreen extends React.Component {
                     let t = JSON.parse(response["_bodyInit"]);
                     //console.log(t)
                     // console.log(t["payload"][0]["displayName"] + " with confidence: " + t["payload"][1]["classification"]["score"])
-                    
+                    console.log(t)
+                    console.log("\n")
                     //var arr = t['payload'][0]['displayName'];
                     var arr = [];
-                    for(var i = 0; i < t["payload"].length; i++){
-                        arr.push(t["payload"][i]["displayName"]);
+                    for (var i = 0; i < 4; i++) {
+
+                        // edge case for no beard (want to maintain the threshold for other things)
+                        // print out the output
+                        // do something with picPath text here,
+                        if (t["payload"][i]["displayName"] == 'No_Beard' && t["payload"][i]["classification"]["score"] > 0.6) {
+                            arr.push(t["payload"][i]["displayName"]);
+                        }
+                        // store the correct and finalized random path in a global variable 
+                        // use that to determine which image to print
+                        if (t["payload"][i]["displayName"] == 'Wearing_Hat'  && t["payload"][i]["classification"]["score"] > 0.6) {
+                            arr.push(t["payload"][i]["displayName"]);
+                        }
+                        if (t["payload"][i]["displayName"] == 'Wearing_Lipstick' && t["payload"][i]["classification"]["score"] > 0.6) {
+                            arr.push(t["payload"][i]["displayName"]);
+                        }
+                        if (t["payload"][i]["displayName"] == 'Eyeglasses' && t["payload"][i]["classification"]["score"] > 0.60) {
+                            arr.push(t["payload"][i]["displayName"]);
+                        }
                     }
 
-                    for(var j = 0; j < arr.length; j++){
+                    // print output
+                    for (var j = 0; j < arr.length; j++) {
                         console.log(arr[j])
                     }
+                    // now pick a number between 1 and 3 for ad
+                    var r1 = Math.floor(Math.random() * 3) + 1;        
 
-                    //console.log(t)
+                    // construct picture string
+                    let path = ""
+
+                    if(arr.length == 1){
+                        path = "'../ads/" + arr[0] + r1 + ".jpg'";
+                    } else if (arr.length == 0) {
+                        console.log("NONNNNEEE")
+                    } else {
+                        var r = Math.floor(Math.random() * arr.length - 1);
+                        path = "'../ads/" + arr[r] + r1 + ".jpg'";
+                    }
+                    // to get random ad, we need to pick a random category
+                    // (pick a number between 0 and size of arr-1)
+
+                    
+                    // if (arr[r] == undefined) {
+                    //     path = "'../ads/Eyeglasses" + r1 + ".jpg'";
+                                         
+                    console.log(path);
+
+                    //this.setState({ picPath: path });
+
+                    //path = "../ads/Eyeglasses1.jpg";
+
                     console.log("\n")
-
+                    this.props.navigation.navigate('Ad', {path})
 
                     // now we have an arr array, full of the necessary categories. 
                     // we can pass this to a function that picks a random value to advertise for
-                    
+
 
                 })
                 .catch((error) => {
@@ -409,14 +447,31 @@ class HomeScreen extends React.Component {
                                     style={styles.cameraButtons}
                                     //onPress={() => { this.takeAndUploadPhotoAsync() }} //--> uploads data to back-end api
                                     onPress={() => { this.uploadToCloud() }}           //  --> uploads data to vision cloud
+
                                 >
                                     <Text
                                         style={{ fontSize: 18, marginBottom: 10, color: "white" }}
                                     >
-                                        Upload
+                                        Continue
                   </Text>
                                 </TouchableOpacity>
                             </View>
+
+                            <View style={styles.captureButtonView}>
+                                <TouchableOpacity
+                                    style={styles.cameraButtons}
+                                    onPress={() => { this.showAdvertisement }}
+                                >
+                                    <Text
+                                        style={{ fontSize: 18, marginBottom: 10, color: "white" }}
+                                    >
+                                        Show ad
+                  </Text>
+                                </TouchableOpacity>
+
+
+                            </View>
+
                         </View>
                     ) : null}
                     <ScrollView>
@@ -427,9 +482,11 @@ class HomeScreen extends React.Component {
                                 fontSize: 20,
                                 fontStyle: "italic"
                             }}>
-                                What am I?
+                                Tap continue to view targetted advertisement.
                         </Text>
                             <Text style={{ color: "#ffffff", fontSize: 18 }}>
+
+                                {/* output text of API goes here */}
                                 {this.state.jsonText}
                             </Text>
                         </View>
@@ -504,5 +561,20 @@ const styles = StyleSheet.create({
     },
     textView: {
         padding: 0
-    }
+    },
+    Image: {
+        flex: 1,
+        aspectRatio: 1,
+        resizeMode: 'contain',
+        alignItems: 'lower',
+        justifyContent: 'center'
+    },
+    Image2: {
+        position: 'absolute',
+        alignItems: 'right',
+        width: 60,
+        height: 60,
+        top: 15,
+        right: 15,
+    },
 });
