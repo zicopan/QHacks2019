@@ -4,6 +4,6 @@ JABBIC harnesses the power of machine learning to recognize specific facial qual
 
 For more information, please visit https://devpost.com/software/jabbic
 
-NOTE: not included in this repo are node_modules. To run this app successfully, you will need to start up an Expo app with React Native.
+NOTE: not included in this repo are node_modules, and AutoML API information. To run this app successfully, you will need to start up an Expo app with React Native to obtain the necessary modules, download the sample dataset from Kaggle, and set up your own model with AutoML. The dataset we used and trained for this app can be found here: https://www.kaggle.com/jessicali9530/celeba-dataset
 
 Pictures of app coming soon.
